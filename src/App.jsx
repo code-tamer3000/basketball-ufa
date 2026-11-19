@@ -2,6 +2,7 @@ import { Clock3, MapPin, Phone, Send, Trophy } from 'lucide-react'
 import gamePhoto from './assets/game.jpg'
 import coachPhoto from './assets/coach.jpg'
 
+const coachName = 'Кучин Степан Алексеевич'
 const phone = { label: '+7 917 800 05 64', href: 'tel:+79178000564' }
 const telegram = { label: '@stepaa7', href: 'https://t.me/stepaa7' }
 const sessions = [
@@ -62,6 +63,7 @@ function App() {
             <div className="hero-content">
               <div className="eyebrow hero-eyebrow"><MapPin size={16} aria-hidden="true" /> Уфа <span /> Для детей</div>
               <h1 id="hero-title">Баскетбольные <em>тренировки</em></h1>
+              <p className="hero-name">{coachName}</p>
               <blockquote className="hero-quote">
                 «Строгость к себе сегодня — преимущество завтра. Стремлюсь показывать детям баскетбол таким, какой он есть на самом деле».
               </blockquote>
@@ -95,7 +97,8 @@ function App() {
             </figure>
             <div className="coach-content">
               <h2 id="coach-title">О тренере</h2>
-              <p>Я выпускник СШОР № 2. В сезоне 2024–2025 выступал за «Уфимец». Всю игровую карьеру провёл на позиции разыгрывающего.</p>
+              <p className="coach-name">{coachName}</p>
+              <p className="coach-bio">Я выпускник СШОР № 2. В сезоне 2024–2025 выступал за «Уфимец». Всю игровую карьеру провёл на позиции разыгрывающего.</p>
               <div className="achievements">
                 <Trophy size={25} aria-hidden="true" />
                 <div>
