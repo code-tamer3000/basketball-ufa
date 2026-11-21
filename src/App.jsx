@@ -1,10 +1,18 @@
-import { Clock3, MapPin, Phone, Send, Trophy } from 'lucide-react'
+import { useEffect, useState } from 'react'
+import { Clock3, MapPin, MessageCircle, Pause, Phone, Play, Trophy } from 'lucide-react'
 import gamePhoto from './assets/game.jpg'
 import coachPhoto from './assets/coach.jpg'
+import groupPhoto from './assets/coach-group.jpg'
+import awardsPhoto from './assets/coach-awards.jpg'
 
 const coachName = 'Кучин Степан Алексеевич'
 const phone = { label: '+7 917 800 05 64', href: 'tel:+79178000564' }
 const telegram = { label: '@stepaa7', href: 'https://t.me/stepaa7' }
+const maxHref = 'https://max.ru/u/f9LHodD0cOLgz5w6X0zvnJI3F5X1z51sDLuHzgE8pCDzkQQY9ab50r-lFEo'
+const heroPhotos = [
+  { src: gamePhoto, alt: 'Степан ведёт мяч в форме «Уфимца» под номером 66' },
+  { src: coachPhoto, alt: 'Степан в синей форме «Уфимца» на баскетбольной площадке' },
+]
 const sessions = [
   { duration: '1 час', price: '1 189' },
   { duration: '1,5 часа', price: '1 489' },
@@ -21,20 +29,72 @@ function Brand() {
 }
 
 function BookLink({ children, duration, className = '', icon: Icon }) {
-  const time = duration ? ` (${duration})` : ''
-  const draft = `Здравствуйте! Хочу записать ребёнка на тренировку по баскетболу${time}. Подскажите, пожалуйста, когда можно прийти?`
-
   return (
     <a
       className={`button ${className}`}
-      href={`${telegram.href}?text=${encodeURIComponent(draft)}`}
+      href={maxHref}
       target="_blank"
       rel="noopener noreferrer"
-      aria-label={duration ? `Выбрать тренировку на ${duration} в Telegram` : undefined}
+      aria-label={duration ? `Выбрать в MAX тренировку на ${duration}` : undefined}
     >
       {Icon && <Icon size={17} aria-hidden="true" />}
       {children}
     </a>
+  )
+}
+
+function HeroGallery() {
+  const [active, setActive] = useState(0)
+  const [rotating, setRotating] = useState(() => !window.matchMedia('(prefers-reduced-motion: reduce)').matches)
+  const [hovered, setHovered] = useState(false)
+
+  useEffect(() => {
+    const motion = window.matchMedia('(prefers-reduced-motion: reduce)')
+    function respectMotionPreference(event) {
+      if (event.matches) setRotating(false)
+    }
+    motion.addEventListener('change', respectMotionPreference)
+    return () => motion.removeEventListener('change', respectMotionPreference)
+  }, [])
+
+  useEffect(() => {
+    if (!rotating || hovered) return
+    const timer = window.setInterval(() => {
+      setActive(current => (current + 1) % heroPhotos.length)
+    }, 6500)
+    return () => window.clearInterval(timer)
+  }, [hovered, rotating])
+
+  return (
+    <div className="hero-gallery" role="group" aria-label="Фотографии из «Уфимца»"
+      onMouseEnter={() => setHovered(true)} onMouseLeave={() => setHovered(false)}>
+      <div className="hero-image" aria-live={rotating ? 'off' : 'polite'}>
+        {heroPhotos.map(({ src, alt }, index) => (
+          <div className={`hero-slide${index === active ? ' is-active' : ''}`} key={src} aria-hidden={index !== active}>
+            <img src={src} alt={alt} width="1280" height="852" fetchPriority={index === 0 ? 'high' : undefined} />
+          </div>
+        ))}
+      </div>
+      <div className="hero-photo-tools">
+        <div className="hero-caption"><span>БК «Уфимец»</span><span>Сезон 2024–2025</span></div>
+        <div className="hero-controls" role="group" aria-label="Переключение фотографий">
+          <button className="hero-control" type="button" onClick={() => setRotating(value => !value)}
+            aria-label={rotating ? 'Остановить смену фото' : 'Включить смену фото'}>
+            {rotating ? <Pause size={14} aria-hidden="true" /> : <Play size={14} aria-hidden="true" />}
+          </button>
+          {heroPhotos.map(({ src }, index) => (
+            <button className="hero-control hero-dot" key={src} type="button"
+              aria-label={`Фото ${index + 1}`} aria-pressed={index === active}
+              onFocus={() => setRotating(false)}
+              onClick={() => {
+                setRotating(false)
+                setActive(index)
+              }}
+            />
+          ))}
+        </div>
+      </div>
+    </div>
   )
 }
 
@@ -56,9 +116,6 @@ function App() {
 
       <main id="main">
         <section className="hero" aria-labelledby="hero-title">
-          <div className="hero-image">
-            <img src={gamePhoto} width="1280" height="852" alt="Тренер ведёт мяч в форме «Уфимца» под номером 66" fetchPriority="high" />
-          </div>
           <div className="container hero-inner">
             <div className="hero-content">
               <div className="eyebrow hero-eyebrow"><MapPin size={16} aria-hidden="true" /> Уфа <span /> Для детей</div>
@@ -67,10 +124,10 @@ function App() {
               <blockquote className="hero-quote">
                 «Строгость к себе сегодня — преимущество завтра. Стремлюсь показывать детям баскетбол таким, какой он есть на самом деле».
               </blockquote>
-              <BookLink icon={Send} className="button-primary">Записаться на тренировку</BookLink>
+              <BookLink icon={MessageCircle} className="button-primary">Записаться в MAX</BookLink>
             </div>
-            <div className="hero-caption"><span>БК «Уфимец»</span><span>Сезон 2024–2025</span></div>
           </div>
+          <HeroGallery />
         </section>
 
         <div className="stats">
@@ -92,9 +149,10 @@ function App() {
 
         <section className="coach section" id="coach" aria-labelledby="coach-title">
           <div className="container coach-inner">
-            <figure className="coach-figure">
-              <img src={coachPhoto} width="1280" height="852" alt="Тренер в синей форме «Уфимца» на баскетбольной площадке" loading="lazy" />
-            </figure>
+            <div className="coach-photos">
+              <img src={groupPhoto} width="1280" height="960" alt="Групповое фото с тренером в баскетбольном зале" loading="lazy" />
+              <img src={awardsPhoto} width="1280" height="960" alt="Групповое фото с дипломами и наградами на площадке" loading="lazy" />
+            </div>
             <div className="coach-content">
               <h2 id="coach-title">О тренере</h2>
               <p className="coach-name">{coachName}</p>
@@ -106,6 +164,9 @@ function App() {
                   <ul>
                     <li>Призёр первенства России (ПФО)</li>
                     <li>Многократный чемпион Республики Башкортостан</li>
+                    <li>Двукратный MVP школьной баскетбольной лиги «КЭС Баскет»</li>
+                    <li>Чемпион лиги МЛБЛ Уфа в составе команды «Витязь» в сезоне 2021–2022</li>
+                    <li>Вызван в сборную «КЭС Баскет» в сезоне 2021–2022</li>
                   </ul>
                 </div>
               </div>
@@ -124,7 +185,7 @@ function App() {
                 <li key={duration}>
                   <h3><Clock3 size={19} aria-hidden="true" />{duration}</h3>
                   <p>{price} <span>₽</span></p>
-                  <BookLink className="button-session" duration={duration}>Выбрать</BookLink>
+                  <BookLink className="button-session" duration={duration}>Выбрать в MAX</BookLink>
                 </li>
               ))}
             </ul>
@@ -138,8 +199,9 @@ function App() {
               <h2 id="contact-title">Запись на тренировку</h2>
               <p>Покажу и расскажу, и что самое главное, <strong>ОБУЧУ</strong> Вашего ребенка начальным шагам, а если это уже подготовленный ребенок, то к нему будет усиленный подход, для более развитых и опытных детей.</p>
               <div className="contact-actions">
-                <BookLink icon={Send} className="button-primary">Записаться в Telegram</BookLink>
-                <a className="button button-phone" href={phone.href}><Phone size={17} aria-hidden="true" />{phone.label}</a>
+                <BookLink icon={MessageCircle} className="button-primary">Записаться в MAX</BookLink>
+                <a className="button button-contact" href={telegram.href} target="_blank" rel="noopener noreferrer">Telegram</a>
+                <a className="button button-contact" href={phone.href}><Phone size={17} aria-hidden="true" />{phone.label}</a>
               </div>
             </div>
           </div>
