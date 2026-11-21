@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react'
-import { Clock3, MapPin, MessageCircle, Pause, Phone, Play, Trophy } from 'lucide-react'
+import { Clock3, MapPin, MessageCircle, Phone, Trophy } from 'lucide-react'
 import gamePhoto from './assets/game.jpg'
 import coachPhoto from './assets/coach.jpg'
 import groupPhoto from './assets/coach-group.jpg'
@@ -75,25 +75,17 @@ function HeroGallery() {
           </div>
         ))}
       </div>
-      <div className="hero-photo-tools">
-        <div className="hero-caption"><span>БК «Уфимец»</span><span>Сезон 2024–2025</span></div>
-        <div className="hero-controls" role="group" aria-label="Переключение фотографий">
-          <button className="hero-control" type="button" onClick={() => setRotating(value => !value)}
-            aria-label={rotating ? 'Остановить смену фото' : 'Включить смену фото'}>
-            {rotating ? <Pause size={14} aria-hidden="true" /> : <Play size={14} aria-hidden="true" />}
-          </button>
-          {heroPhotos.map(({ src }, index) => (
-            <button className="hero-control hero-dot" key={src} type="button"
-              aria-label={`Фото ${index + 1}`} aria-pressed={index === active}
-              onFocus={() => setRotating(false)}
-              onClick={() => {
-                setRotating(false)
-                setActive(index)
-              }}
-            />
-          ))}
-        </div>
-      </div>
+      <button
+        className="hero-photo-switch"
+        type="button"
+        aria-label="Показать следующее фото"
+        onFocus={() => setRotating(false)}
+        onClick={() => {
+          setRotating(false)
+          setActive(current => (current + 1) % heroPhotos.length)
+        }}
+      />
+      <div className="hero-caption"><span>БК «Уфимец»</span><span>Сезон 2024–2025</span></div>
     </div>
   )
 }
