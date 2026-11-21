@@ -1,5 +1,5 @@
-import { useEffect, useState } from 'react'
-import { Clock3, MapPin, MessageCircle, Phone, Trophy } from 'lucide-react'
+import { useEffect, useRef, useState } from 'react'
+import { Clock3, MapPin, MessageCircle, Phone, Send, Trophy, X } from 'lucide-react'
 import gamePhoto from './assets/game.jpg'
 import coachPhoto from './assets/coach.jpg'
 import groupPhoto from './assets/coach-group.jpg'
@@ -7,7 +7,7 @@ import awardsPhoto from './assets/coach-awards.jpg'
 
 const coachName = 'Кучин Степан Алексеевич'
 const phone = { label: '+7 917 800 05 64', href: 'tel:+79178000564' }
-const telegram = { label: '@stepaa7', href: 'https://t.me/stepaa7' }
+const telegramHref = 'https://t.me/stepaa7'
 const maxHref = 'https://max.ru/u/f9LHodD0cOLgz5w6X0zvnJI3F5X1z51sDLuHzgE8pCDzkQQY9ab50r-lFEo'
 const heroPhotos = [
   { src: gamePhoto, alt: 'Степан ведёт мяч в форме «Уфимца» под номером 66' },
@@ -28,18 +28,59 @@ function Brand() {
   )
 }
 
-function BookLink({ children, duration, className = '', icon: Icon }) {
+function BookButton({ onBook, duration, className }) {
   return (
-    <a
+    <button
       className={`button ${className}`}
-      href={maxHref}
-      target="_blank"
-      rel="noopener noreferrer"
-      aria-label={duration ? `Выбрать в MAX тренировку на ${duration}` : undefined}
+      type="button"
+      aria-haspopup="dialog"
+      aria-label={duration ? `Записаться на тренировку на ${duration}` : undefined}
+      onClick={() => onBook(duration)}
     >
-      {Icon && <Icon size={17} aria-hidden="true" />}
-      {children}
-    </a>
+      Записаться
+    </button>
+  )
+}
+
+function BookingDialog({ dialogRef, duration }) {
+  const time = duration ? ` (${duration})` : ''
+  const message = `Здравствуйте! Хочу записать ребёнка на тренировку по баскетболу${time}. Подскажите, пожалуйста, когда можно прийти?`
+  function close() {
+    dialogRef.current.close()
+  }
+
+  return (
+    <dialog
+      className="booking-dialog"
+      ref={dialogRef}
+      aria-labelledby="booking-title"
+      aria-describedby={duration ? 'booking-duration' : undefined}
+      onClick={event => {
+        if (event.target === event.currentTarget) close()
+      }}
+    >
+      <div className="booking-panel">
+        <div className="booking-header">
+          <h2 id="booking-title">Способ записи</h2>
+          <button className="booking-close" type="button" aria-label="Закрыть" onClick={close}>
+            <X size={22} aria-hidden="true" />
+          </button>
+        </div>
+        {duration && <p className="booking-duration" id="booking-duration">Тренировка · {duration}</p>}
+        <div className="booking-options">
+          <a className="button button-primary booking-option" href={maxHref} target="_blank" rel="noopener noreferrer" onClick={close}>
+            <MessageCircle size={19} aria-hidden="true" /> Написать в MAX
+          </a>
+          <a className="button booking-option booking-secondary" href={`${telegramHref}?text=${encodeURIComponent(message)}`} target="_blank" rel="noopener noreferrer" onClick={close}>
+            <Send size={19} aria-hidden="true" /> Написать в Telegram
+          </a>
+          <a className="button booking-option booking-secondary" href={phone.href} onClick={close}>
+            <Phone size={19} aria-hidden="true" />
+            <span>Позвонить<span className="booking-phone">{phone.label}</span></span>
+          </a>
+        </div>
+      </div>
+    </dialog>
   )
 }
 
@@ -91,6 +132,14 @@ function HeroGallery() {
 }
 
 function App() {
+  const dialogRef = useRef(null)
+  const [duration, setDuration] = useState()
+
+  function openBooking(sessionDuration) {
+    setDuration(sessionDuration)
+    dialogRef.current.showModal()
+  }
+
   return (
     <div id="top">
       <a className="skip-link" href="#main">К содержанию</a>
@@ -102,7 +151,7 @@ function App() {
             <a href="#training">Тренировки</a>
             <a href="#contacts">Контакты</a>
           </nav>
-          <BookLink className="button-header">Записаться</BookLink>
+          <BookButton className="button-header" onBook={openBooking} />
         </div>
       </header>
 
@@ -116,7 +165,7 @@ function App() {
               <blockquote className="hero-quote">
                 «Строгость к себе сегодня — преимущество завтра. Стремлюсь показывать детям баскетбол таким, какой он есть на самом деле».
               </blockquote>
-              <BookLink icon={MessageCircle} className="button-primary">Записаться в MAX</BookLink>
+              <BookButton className="button-primary" onBook={openBooking} />
             </div>
           </div>
           <HeroGallery />
@@ -177,7 +226,7 @@ function App() {
                 <li key={duration}>
                   <h3><Clock3 size={19} aria-hidden="true" />{duration}</h3>
                   <p>{price} <span>₽</span></p>
-                  <BookLink className="button-session" duration={duration}>Выбрать в MAX</BookLink>
+                  <BookButton className="button-session" duration={duration} onBook={openBooking} />
                 </li>
               ))}
             </ul>
@@ -190,11 +239,7 @@ function App() {
             <div className="contact-content">
               <h2 id="contact-title">Запись на тренировку</h2>
               <p>Покажу и расскажу, и что самое главное, <strong>ОБУЧУ</strong> Вашего ребенка начальным шагам, а если это уже подготовленный ребенок, то к нему будет усиленный подход, для более развитых и опытных детей.</p>
-              <div className="contact-actions">
-                <BookLink icon={MessageCircle} className="button-primary">Записаться в MAX</BookLink>
-                <a className="button button-contact" href={telegram.href} target="_blank" rel="noopener noreferrer">Telegram</a>
-                <a className="button button-contact" href={phone.href}><Phone size={17} aria-hidden="true" />{phone.label}</a>
-              </div>
+              <BookButton className="button-primary" onBook={openBooking} />
             </div>
           </div>
         </section>
@@ -203,12 +248,9 @@ function App() {
       <footer className="site-footer">
         <div className="container footer-inner">
           <Brand />
-          <div className="footer-links">
-            <a href={phone.href}>{phone.label}</a>
-            <a href={telegram.href} target="_blank" rel="noopener noreferrer">{telegram.label}</a>
-          </div>
         </div>
       </footer>
+      <BookingDialog dialogRef={dialogRef} duration={duration} />
     </div>
   )
 }
