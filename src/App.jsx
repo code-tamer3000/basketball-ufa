@@ -7,7 +7,7 @@ import awardsPhoto from './assets/coach-awards.jpg'
 
 const coachName = 'Кучин Степан Алексеевич'
 const phone = { label: '+7 917 800 05 64', href: 'tel:+79178000564' }
-const telegramHref = 'https://t.me/stepaa7'
+const telegram = { label: '@stepaa7', href: 'https://t.me/stepaa7' }
 const maxHref = 'https://max.ru/u/f9LHodD0cOLgz5w6X0zvnJI3F5X1z51sDLuHzgE8pCDzkQQY9ab50r-lFEo'
 const heroPhotos = [
   { src: gamePhoto, alt: 'Степан ведёт мяч в форме «Уфимца» под номером 66' },
@@ -71,7 +71,7 @@ function BookingDialog({ dialogRef, duration }) {
           <a className="button button-primary booking-option" href={maxHref} target="_blank" rel="noopener noreferrer" onClick={close}>
             <MessageCircle size={19} aria-hidden="true" /> Написать в MAX
           </a>
-          <a className="button booking-option booking-secondary" href={`${telegramHref}?text=${encodeURIComponent(message)}`} target="_blank" rel="noopener noreferrer" onClick={close}>
+          <a className="button booking-option booking-secondary" href={`${telegram.href}?text=${encodeURIComponent(message)}`} target="_blank" rel="noopener noreferrer" onClick={close}>
             <Send size={19} aria-hidden="true" /> Написать в Telegram
           </a>
           <a className="button booking-option booking-secondary" href={phone.href} onClick={close}>
@@ -248,6 +248,10 @@ function App() {
       <footer className="site-footer">
         <div className="container footer-inner">
           <Brand />
+          <div className="footer-links">
+            <a href={phone.href}>{phone.label}</a>
+            <a href={telegram.href} target="_blank" rel="noopener noreferrer">{telegram.label}</a>
+          </div>
         </div>
       </footer>
       <BookingDialog dialogRef={dialogRef} duration={duration} />
